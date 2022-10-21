@@ -17,6 +17,7 @@
     "@fontsource/ibm-plex-mono": "^4.5.1",
     "@fontsource/inter": "^4.5.1",
     "babel-plugin-styled-components": "^2.0.2",
+    "firebase": "^9.12.1",
     "gatsby": "^4.5.2",
     "gatsby-plugin-google-analytics": "^4.5.0",
     "gatsby-plugin-image": "^2.5.1",
