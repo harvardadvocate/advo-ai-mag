@@ -96,7 +96,7 @@ export default function Art() {
                         <Nav >
                         {artGenerationsSnapshot?.docs.map((doc) => (
                                     <Nav.Item eventKey={doc.id}
-                                        onClick={() => {setImgArray(doc.data().generatedImgUrls), setInputData({inputText: doc.data().prompt, inputCategory: doc.data().writingType})}}
+                                        onClick={() => {setImgArray(doc.data().generatedImgUrls), setInputData({inputText: doc.data().prompt, inputCategory: doc.data().style})}}
                                     >
                                         <div className="relative flex justify-center items-center flex-grow py-2 pr-8">
                                           <img src={ doc.data().generatedImgUrls[0] } className="w-16 h-auto mx-1" alt="" />
