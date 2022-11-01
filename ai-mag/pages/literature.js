@@ -2,15 +2,15 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import { getSession, useSession } from 'next-auth/client';
 import Login from '../components/Login';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { db } from '../firebase';
-import { Select, MenuItem, Button, TextField  } from "@mui/material";
+import { Select, MenuItem, Button  } from "@mui/material";
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import { createLiteratureData } from '../components/handleData';
 import { checkLanguage, checkAccount } from '../components/check';
 import { useCollection } from "react-firebase-hooks/firestore"
-import { Sidenav, Nav, Dropdown } from 'rsuite';
+import { Sidenav, Nav } from 'rsuite';
 import Icon from '@material-tailwind/react/Icon';
 
 export default function Literature() {
@@ -22,10 +22,6 @@ export default function Literature() {
     inputText: null,
     inputCategory: null,
   })
-  const emptyArray = ["https://lanecdr.org/wp-content/uploads/2019/08/placeholder.png", "https://lanecdr.org/wp-content/uploads/2019/08/placeholder.png", "https://lanecdr.org/wp-content/uploads/2019/08/placeholder.png", "https://lanecdr.org/wp-content/uploads/2019/08/placeholder.png"]
-  const loadingArray = ["https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif"]
-  const [imgArray, setImgArray] = useState(emptyArray);
-  const [URL, setURL] = useState(null);
   const baseURL = "https://ai-mag.ngrok.io/generate-text";
   const [generatedText, setGeneratedText] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -34,10 +30,6 @@ export default function Literature() {
     session.user.email).collection('artGenerations').orderBy('timestamp', 'desc'))
   const [literatureGenerationsSnapshot] = useCollection(db.collection('userData').doc(
     session.user.email).collection('literatureGenerations').orderBy('timestamp', 'desc'))
-
-  useEffect(() => {
-    console.log("GenerateImg useEffect")
-}, [imgArray]);
 
   const handleInputChange = (event) => {
     console.log("setting inputData: ", event.target.name, event.target.value);
@@ -62,7 +54,6 @@ export default function Literature() {
       console.log("response", response.data);
       setGeneratedText(response.data.generatedText);
 
-      
       createLiteratureData({prompt: inputData.inputText, writingType: inputData.inputCategory, generatedText: response.data.generatedText, db: db, session: session});
     }
     }

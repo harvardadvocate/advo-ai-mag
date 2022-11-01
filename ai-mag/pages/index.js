@@ -2,7 +2,7 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import { getSession, useSession } from 'next-auth/client';
 import Login from '../components/Login';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { TypeAnimation } from 'react-type-animation';
 
 export default function Home() {
@@ -26,7 +26,6 @@ export default function Home() {
       repeat={false}
     />
   </div>
-
 
     </div>
   )

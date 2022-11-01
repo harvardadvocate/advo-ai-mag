@@ -6,13 +6,11 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { Select, MenuItem, Button } from "@mui/material";
 import axios from 'axios';
-import { Tooltip } from '@mui/material';
 import { createArtData } from '../components/handleData';
 import { checkLanguage, checkAccount } from '../components/check';
 import { useCollection } from "react-firebase-hooks/firestore"
-import { Sidenav, Nav, Dropdown } from 'rsuite';
+import { Sidenav, Nav } from 'rsuite';
 import Icon from '@material-tailwind/react/Icon';
-import { serverTimestamp } from "firebase/firestore";
 
 export default function Art() {
 
@@ -26,7 +24,6 @@ export default function Art() {
   const emptyArray = ["https://www.kurin.com/wp-content/uploads/placeholder-square.jpg", "https://www.kurin.com/wp-content/uploads/placeholder-square.jpg", "https://www.kurin.com/wp-content/uploads/placeholder-square.jpg", "https://www.kurin.com/wp-content/uploads/placeholder-square.jpg"]
   const loadingArray = ["https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif", "https://gistalt.s3.us-west-1.amazonaws.com/loading.gif"]
   const [imgArray, setImgArray] = useState(emptyArray);
-  const [URL, setURL] = useState(null);
   const baseURL = "https://ai-mag.ngrok.io/generate-image";
   const [showModal, setShowModal] = useState(false);
 
@@ -159,10 +156,6 @@ export default function Art() {
           <img src={ imgArray[3] } className="w-1/4 h-auto mx-4" alt="" /> 
           
       </div>
-      {/* <div className="relative flex justify-center items-center flex-grow pt-8 pb-16 mx-52">
-          <img src={ imgArray[2] } className="w-1/2 h-auto mx-4" alt="" />
-          <img src={ imgArray[3] } className="w-1/2 h-auto mx-4" alt="" /> 
-      </div> */}
 
     </div>
   )
