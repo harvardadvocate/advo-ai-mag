@@ -12,3 +12,5 @@ Prerequisite: access to advo-ai-mag firebase app
 
 ### Implementation
 * art.js / literature.js - art / literature generation pages, includes history component that renders history of generations, on click propogates into current input fields
+* POST request format: {prompt, category, (alias)}
+* check.js - checks for inappropriate language, checks whether user still has queries left

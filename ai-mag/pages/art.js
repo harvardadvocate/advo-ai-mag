@@ -7,6 +7,12 @@ import { db } from '../firebase';
 import { Select, MenuItem, Button } from "@mui/material";
 import axios from 'axios';
 import { Tooltip } from '@mui/material';
+import { createArtData } from '../components/handleData';
+import { checkLanguage, checkAccount } from '../components/check';
+import { useCollection } from "react-firebase-hooks/firestore"
+import { Sidenav, Nav, Dropdown } from 'rsuite';
+import Icon from '@material-tailwind/react/Icon';
+import { serverTimestamp } from "firebase/firestore";
 
 export default function Art() {
 
@@ -22,14 +28,16 @@ export default function Art() {
   const [imgArray, setImgArray] = useState(emptyArray);
   const [URL, setURL] = useState(null);
   const baseURL = "https://ai-mag.ngrok.io/generate-image";
+  const [showModal, setShowModal] = useState(false);
+
+  const [artGenerationsSnapshot] = useCollection(db.collection('userData').doc(
+    session.user.email).collection('artGenerations').orderBy('timestamp', 'desc'))
+  const [literatureGenerationsSnapshot] = useCollection(db.collection('userData').doc(
+    session.user.email).collection('literatureGenerations').orderBy('timestamp', 'desc'))
 
   useEffect(() => {
     console.log("GenerateImg useEffect")
 }, [imgArray]);
-
-  // useEffect(() => { 
-  //   // setURL(`${baseURL}?inputText=${inputData.inputText}&inputCategory=${inputData.inputCategory}`)
-  // }, [inputData]);
 
   const handleInputChange = (event) => {
     console.log("setting inputData: ", event.target.name, event.target.value);
@@ -40,10 +48,15 @@ export default function Art() {
 
   async function handleSubmit(event) {
     console.log("inputData", inputData)
-    setImgArray(loadingArray);
-    if (inputData.inputText && inputData.inputCategory) {
 
-      const data = JSON.stringify({ "prompt": inputData.inputText, "style": inputData.inputCategory, "alias": "testAlias" });
+    if (inputData.inputText && inputData.inputCategory) {
+      if (checkAccount({artGenerationsSnapshot: artGenerationsSnapshot, literatureGenerationsSnapshot: literatureGenerationsSnapshot}) && checkLanguage({prompt: inputData.inputText})) {
+
+      setImgArray(loadingArray);
+
+      const timestamp = Math.round(Date.now() / 1000)
+
+      const data = JSON.stringify({ "prompt": inputData.inputText, "style": inputData.inputCategory, "alias": session.user.email + "_" + timestamp });
       const response = await axios.post(baseURL, data,
       {
       headers: {
@@ -53,6 +66,9 @@ export default function Art() {
       console.log("response", response.data);
       setImgArray(response.data.generatedImgUrls)
 
+      createArtData({prompt: inputData.inputText, style: inputData.inputCategory, generatedImgUrls: response.data.generatedImgUrls, db: db, session: session});
+    }
+    
     }
     else {
       alert("Please fill out all fields")
@@ -67,41 +83,41 @@ export default function Art() {
       </Head>
       <Header />
 
-      {/* <div className="component-style">
-      <form onSubmit={handleSubmit}>
-        <fieldset>
-              <div className="flex items-center w-full px-0">
-                <input onChange={handleInputChange} value={prompt} type="search" className=" form-control relative flex-auto min-w-0 block w-full px-3 py-1.5 text-base font-normal text-light-gray bg-base-gray bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-light-gray focus:bg-mid-gray focus:border-blue-600 focus:outline-none" placeholder="Enter prompt" aria-label="Enter prompt" aria-describedby="button-addon3"/>
-                <Tooltip title="Generate image">
-                <div className="p-3">
-                <Button onClick={handleSubmit} variant="contained">Submit</Button>
-                </div>
-                </Tooltip>
-          </div>
-        </fieldset>
-      </form>
+      {showModal ? 
+      (
+        <div className='fixed right-0 z-10 top-[40px] h-full'>
+            <div className='h-full w-[340px]'>
+                <Sidenav className='h-full' defaultOpenKeys={['3', '4']} >
+                    <Sidenav.Body >
+                      <div className='cursor-pointer pl-72 pt-4'>
+                    <Icon name="close" size='3xl' onClick={() => setShowModal(false)} />
+                    </div>
+                    <h4 className="relative flex justify-center pt-4">Past Generations</h4>
+                        <Nav >
+                        {artGenerationsSnapshot?.docs.map((doc) => (
+                                    <Nav.Item eventKey={doc.id}
+                                        onClick={() => {setImgArray(doc.data().generatedImgUrls), setInputData({inputText: doc.data().prompt, inputCategory: doc.data().writingType})}}
+                                    >
+                                        <div className="relative flex justify-center items-center flex-grow py-2 pr-8">
+                                          <img src={ doc.data().generatedImgUrls[0] } className="w-16 h-auto mx-1" alt="" />
+                                          <img src={ doc.data().generatedImgUrls[1] } className="w-16 h-auto mx-1" alt="" /> 
+                                          <img src={ doc.data().generatedImgUrls[2] } className="w-16 h-auto mx-1" alt="" />
+                                          <img src={ doc.data().generatedImgUrls[3] } className="w-16 h-auto mx-1" alt="" /> 
+                                      </div>
+                                    </Nav.Item>
+                                ))}
 
-
-      <div className="grid grid-cols-4 gap-4 py-4 flex items-center">
-        <label className="mb-4 cursor-pointer">
-          <input type="radio" name="test" value={0} onClick={handleImgChange} readOnly=""/>
-          <img src={ imgArray[0] } className="max-w-full h-auto hover:scale-90 transform transition duration-200" alt="" />
-        </label>
-        <label className="mb-4 cursor-pointer">
-          <input type="radio" name="test" value={1} onClick={handleImgChange} readOnly=""/>
-          <img src={ imgArray[1] } className="max-w-full h-auto hover:scale-90 transform transition duration-200" alt="" />
-        </label>
-        <label className="mb-4 cursor-pointer">
-          <input type="radio" name="test" value={2} onClick={handleImgChange} readOnly=""/>
-          <img src={ imgArray[2] } className="max-w-full h-auto hover:scale-90 transform transition duration-200" alt="" />
-        </label>
-        <label className="mb-4 cursor-pointer">
-          <input type="radio" name="test" value={3} onClick={handleImgChange} readOnly=""/>
-          <img src={ imgArray[3] } className="max-w-full h-auto hover:scale-90 transform transition duration-200" alt="" />
-        </label>      
-      </div>
-
-    </div> */}
+                        </Nav>
+                    </Sidenav.Body>
+                </Sidenav>
+            </div>
+        </div>
+      )
+      : null
+      }
+        <div className='cursor-pointer float-right pr-4 pt-4'>
+        <Icon name="dehaze" size='3xl' onClick={() => setShowModal(true)} />
+        </div>
 
       <form onSubmit={handleSubmit}>
         <fieldset>
@@ -122,7 +138,7 @@ export default function Art() {
               </Select>
               <input
                 name="inputText"
-                className=" w-1/2 mx-5 p-4 text-sm rounded-lg border border-gray-300 shadow-sm font-medium font-extrabold bg-base-gray"
+                className=" w-2/3 mx-5 p-4 text-sm rounded-lg border border-gray-300 shadow-sm font-medium font-extrabold bg-base-gray"
                 placeholder="Enter art prompt"
                 onChange={ handleInputChange }
                 value={ inputData.inputText }
@@ -136,14 +152,17 @@ export default function Art() {
         </fieldset>
       </form>
 
-      <div className="relative flex justify-center items-center flex-grow pt-12 mx-52">
-          <img src={ imgArray[0] } className="w-1/2 h-auto mx-4" alt="" />
-          <img src={ imgArray[1] } className="w-1/2 h-auto mx-4" alt="" /> 
+      <div className="relative flex justify-center items-center flex-grow pt-12 mx-[10%]">
+          <img src={ imgArray[0] } className="w-1/4 h-auto mx-4" alt="" />
+          <img src={ imgArray[1] } className="w-1/4 h-auto mx-4" alt="" /> 
+          <img src={ imgArray[2] } className="w-1/4 h-auto mx-4" alt="" />
+          <img src={ imgArray[3] } className="w-1/4 h-auto mx-4" alt="" /> 
+          
       </div>
-      <div className="relative flex justify-center items-center flex-grow pt-8 pb-16 mx-52">
+      {/* <div className="relative flex justify-center items-center flex-grow pt-8 pb-16 mx-52">
           <img src={ imgArray[2] } className="w-1/2 h-auto mx-4" alt="" />
           <img src={ imgArray[3] } className="w-1/2 h-auto mx-4" alt="" /> 
-      </div>
+      </div> */}
 
     </div>
   )

@@ -7,6 +7,11 @@ import { db } from '../firebase';
 import { Select, MenuItem, Button, TextField  } from "@mui/material";
 import axios from 'axios';
 import Box from '@mui/material/Box';
+import { createLiteratureData } from '../components/handleData';
+import { checkLanguage, checkAccount } from '../components/check';
+import { useCollection } from "react-firebase-hooks/firestore"
+import { Sidenav, Nav, Dropdown } from 'rsuite';
+import Icon from '@material-tailwind/react/Icon';
 
 export default function Literature() {
 
@@ -23,14 +28,16 @@ export default function Literature() {
   const [URL, setURL] = useState(null);
   const baseURL = "https://ai-mag.ngrok.io/generate-text";
   const [generatedText, setGeneratedText] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const [artGenerationsSnapshot] = useCollection(db.collection('userData').doc(
+    session.user.email).collection('artGenerations').orderBy('timestamp', 'desc'))
+  const [literatureGenerationsSnapshot] = useCollection(db.collection('userData').doc(
+    session.user.email).collection('literatureGenerations').orderBy('timestamp', 'desc'))
 
   useEffect(() => {
     console.log("GenerateImg useEffect")
 }, [imgArray]);
-
-  // useEffect(() => { 
-  //   // setURL(`${baseURL}?inputText=${inputData.inputText}&inputCategory=${inputData.inputCategory}`)
-  // }, [inputData]);
 
   const handleInputChange = (event) => {
     console.log("setting inputData: ", event.target.name, event.target.value);
@@ -42,6 +49,8 @@ export default function Literature() {
   async function handleSubmit(event) {
     console.log("inputData", inputData)
     if (inputData.inputText && inputData.inputCategory) {
+      if (checkAccount({artGenerationsSnapshot: artGenerationsSnapshot, literatureGenerationsSnapshot: literatureGenerationsSnapshot}) && checkLanguage({prompt: inputData.inputText})) {
+        setGeneratedText("generating text...");
 
       const data = JSON.stringify({ "prompt": inputData.inputText, "writingType": inputData.inputCategory });
       const response = await axios.post(baseURL, data,
@@ -52,17 +61,10 @@ export default function Literature() {
       });
       console.log("response", response.data);
       setGeneratedText(response.data.generatedText);
-      
 
-      // try {
-      //   console.log("URL: ", URL)
-      //   const { response } = await axios.post(URL)
-      //   console.log("response", response)
-      //   setImgArray(response)
-      // } catch (error) {
-      //   alert("Error generating image. Please try again.")
-      //   setImgArray(emptyArray)
-      // }
+      
+      createLiteratureData({prompt: inputData.inputText, writingType: inputData.inputCategory, generatedText: response.data.generatedText, db: db, session: session});
+    }
     }
     else {
       alert("Please fill out all fields")
@@ -76,9 +78,40 @@ export default function Literature() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
+      <div>
+      {showModal ? 
+      (
+        <div className='fixed right-0 z-10 top-[40px] h-full'>
+            <div className='h-full w-[340px]'>
+                <Sidenav className='h-full' defaultOpenKeys={['3', '4']} >
+                    <Sidenav.Body >
+                      <div className='cursor-pointer pl-72 pt-4'>
+                    <Icon name="close" size='3xl' onClick={() => setShowModal(false)} />
+                    </div>
+                    <h4 className="relative flex justify-center pt-4">Past Generations</h4>
+                        <Nav >
+                        {literatureGenerationsSnapshot?.docs.map((doc) => (
+                                    <Nav.Item eventKey={doc.id}
+                                        onClick={() => {setGeneratedText(doc.data().generatedText), setInputData({inputText: doc.data().prompt, inputCategory: doc.data().writingType})}}
+                                    >{doc.data().prompt}</Nav.Item>
+                                ))}
+
+                        </Nav>
+                    </Sidenav.Body>
+                </Sidenav>
+            </div>
+        </div>
+      )
+      : null
+      }
+        <div className='cursor-pointer float-right pr-4 pt-4'>
+        <Icon name="dehaze" size='3xl' onClick={() => setShowModal(true)} />
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit}>
         <fieldset>
+          
           <div>
 
             <div className="relative flex justify-center items-center flex-grow pt-16">
@@ -96,8 +129,8 @@ export default function Literature() {
               </Select>
               <input
                 name="inputText"
-                className=" w-1/2 mx-5 p-4 text-sm rounded-lg border border-gray-300 shadow-sm font-medium font-extrabold bg-base-gray"
-                placeholder="Enter art prompt"
+                className=" w-2/3 mx-5 p-4 text-sm rounded-lg border border-gray-300 shadow-sm font-medium font-extrabold bg-base-gray"
+                placeholder="Enter literature prompt"
                 onChange={ handleInputChange }
                 value={ inputData.inputText }
               />

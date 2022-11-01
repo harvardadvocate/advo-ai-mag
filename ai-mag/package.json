@@ -13,6 +13,7 @@
     "@mui/material": "^5.2.6",
     "@next-auth/firebase-adapter": "^0.1.2-pr.183-76202b42.8",
     "axios": "^0.24.0",
+    "bad-words": "^3.0.4",
     "draft-js": "^0.11.7",
     "express": "^4.17.1",
     "firebase": "9.1.3",
