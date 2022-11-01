@@ -1,0 +1,30 @@
+@tailwind components;
+
+@layer components {
+    .option {
+        @apply cursor-pointer hover:bg-gray-100 transition duration-200 ease-out p-2 rounded-lg;
+    }
+    .rdw-editor-toolbar.hide-toolbar {
+        display: none;
+    }
+    .main-editor {
+        min-height: 500px;
+        overflow: auto;
+        background-color: white;
+        /* shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+        display: flex;
+        border-style: solid;
+        border-color: #eeeeee;
+        border-width: 1px;
+        padding: 30px 30px 30px 50px;
+        margin: 50px 5% 200px 5%;
+        /* min-h-3/4 mt-6 bg-white shadow-lg flex mx-10 mb-12 border text-black p-10 */
+      }
+
+      .superFancyBlockquote {
+        color: #999;
+        font-family: 'Hoefler Text', Georgia, serif;
+        font-style: italic;
+        text-align: center;
+      }
+    }
