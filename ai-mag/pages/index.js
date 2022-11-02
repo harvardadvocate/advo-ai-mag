@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Header from '../components/Header'
+import AccessError from '../components/AccessError'
 import { getSession, useSession } from 'next-auth/client';
 import Login from '../components/Login';
 import React from 'react';
@@ -9,6 +10,7 @@ export default function Home() {
 
   const [session] = useSession();
   if (!session) return <Login />
+  if (!session.user.email.endsWith("college.harvard.edu")) return <AccessError />
 
   return (
     <div>

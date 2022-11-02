@@ -24,7 +24,7 @@ export default function Header() {
                     // loading='lazy'
                     className='float-right cursor-pointer mr-3 h-8 w-8 rounded-full ml-2'
                     src={session?.user?.image}
-                    alt={session?.user?.image}
+                    alt={session?.user?.email}
                 />
                 <h1 className='cursor-pointer float-right hidden md:inline-flex ml-5 mr-5 px-1 py-1 text-gray-700 text-lg font-bold'
                 onClick={() => router.push('/art')}

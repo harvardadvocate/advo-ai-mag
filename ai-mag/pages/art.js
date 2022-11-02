@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Header from '../components/Header'
 import { getSession, useSession } from 'next-auth/client';
 import Login from '../components/Login';
+import AccessError from '../components/AccessError'
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { Select, MenuItem, Button } from "@mui/material";
@@ -16,6 +17,7 @@ export default function Art() {
 
   const [session] = useSession();
   if (!session) return <Login />
+  if (!session.user.email.endsWith("college.harvard.edu")) return <AccessError />
 
   const [inputData, setInputData] = useState({
     inputText: null,
